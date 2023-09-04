@@ -2,6 +2,7 @@ import os
 import pandas as pd
 import matplotlib.pyplot as plt
 
+# Set the view: 'side' or 'front'
 view = 'side'
 
 # Load the CSV file into a pandas DataFrame

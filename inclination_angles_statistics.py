@@ -1,14 +1,24 @@
-import cv2
+# Install MediaPipe Python package, write to cmd
+# pip install mediapipe
+
+import cv2 #opencv
 import mediapipe as mp
 import math
 import csv
 import datetime
 
+# Set the view: 'side' or 'front'
 view = 'side'
+
+# If file_name = 0 it will show real-time webcam source
+# otherwise you can write the path to your video
 file_name = 0
+
+# Save the file under the name with date-time ending
 timestamp = datetime.datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
 csv_file_path = f'variables_{timestamp}.csv'
 
+#set up media pipe- create two variables
 mp_drawing = mp.solutions.drawing_utils
 mp_pose = mp.solutions.pose
 
