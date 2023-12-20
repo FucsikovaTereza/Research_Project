@@ -2,15 +2,35 @@ import cv2
 import mediapipe as mp
 import math
 import csv
+import os
 import datetime
 
-view = 'side'
+view = 'front'
 file_name = 0
+#file_name = 'test_videos/horizontal/2022-11-14 09-26-55-2.mp4'
 timestamp = datetime.datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
-csv_file_path = f'variables_{timestamp}.csv'
+
+
+# Output folders
+output_folder_videos = 'result_videos' #'result_videos'
+output_folder_csv = 'result_statistics'
+
+# Create result folders if they don't exist
+os.makedirs(output_folder_videos, exist_ok=True)
+os.makedirs(output_folder_csv, exist_ok=True)
+
+if file_name == 0:
+    csv_file_path = f'variables_{timestamp}.csv'
+else:
+    csv_file_path = os.path.join(output_folder_csv, f'{os.path.splitext(os.path.basename(file_name))[0]}_mp.csv')
+    video_output_path = os.path.join(output_folder_videos, f'{os.path.splitext(os.path.basename(file_name))[0]}_mp.mp4')
+
 
 mp_drawing = mp.solutions.drawing_utils
 mp_pose = mp.solutions.pose
+
+def calculate_distance(a, b):
+    return math.sqrt((a.y - a.x)**2 + (b.y - b.x)**2)
 
 def calculate_angle(a, b, c):
     # Calculate the angle between three points in degrees
@@ -35,7 +55,8 @@ def calculate_angle2(x1, y1, x2, y2):
 with open(csv_file_path, mode='w', newline='') as file:
     writer = csv.writer(file)
     if view == 'front':
-        writer.writerow(["shoulders_angle", "head_right_shoulder_angle", "cervical_spine_angle"])
+        writer.writerow(["video_timestamp", "shoulders_angle", "head_right_shoulder_angle", 
+                         "cervical_spine_angle", "head_pitch_yaw_angle", "eye_ear_dist"])
     elif view == 'side':
         writer.writerow(["neck_inclination", "torso_inclination"])
                 
@@ -44,7 +65,8 @@ if file_name == 0:
 else:
     cap = cv2.VideoCapture(file_name)
     fourcc = cv2.VideoWriter_fourcc(*'MP4V')
-    out = cv2.VideoWriter(f'{file_name}_out_{timestamp}.mp4', fourcc, 30.0, (int(cap.get(3)), int(cap.get(4))))
+    out = cv2.VideoWriter(video_output_path, fourcc, 30.0, (int(cap.get(3)), int(cap.get(4))))
+    
 
 with mp_pose.Pose(min_detection_confidence=0.5, min_tracking_confidence=0.5) as pose:
     while cap.isOpened():
@@ -73,28 +95,37 @@ with mp_pose.Pose(min_detection_confidence=0.5, min_tracking_confidence=0.5) as 
             nose = landmarks[mp_pose.PoseLandmark.NOSE]
             left_ear = landmarks[mp_pose.PoseLandmark.LEFT_EAR]
             left_hip = landmarks[mp_pose.PoseLandmark.LEFT_HIP]
+            left_eye_outer = landmarks[mp_pose.PoseLandmark.LEFT_EYE_OUTER]
             
+            # Get the timestamp
+            current_time = cap.get(cv2.CAP_PROP_POS_MSEC) / 1000  # Current time in seconds
+            video_timestamp = str(datetime.timedelta(seconds=current_time))
             
             if view == 'front':
                 
                 # Calculate angles
                 shoulders_angle = calculate_angle(left_shoulder, nose, right_shoulder)
                 head_right_shoulder_angle = calculate_angle(nose, left_shoulder, right_shoulder)
+                head_pitch_yaw_angle = calculate_angle(nose, left_eye_outer, left_ear)
                 
                 middle_x = (right_shoulder.x + left_shoulder.x) / 2
                 middle_y = (right_shoulder.y + left_shoulder.y) / 2
                 cervical_spine_angle = calculate_angle2(int(middle_x * w), int(middle_y * h), int(left_shoulder.x * w), int(left_shoulder.y * h))
+                
+                eye_ear_dist = calculate_distance(left_ear, left_eye_outer)
     
                 # Open the CSV file in write mode
                 with open(csv_file_path, mode='a', newline='') as file:
                     writer = csv.writer(file)
                     # Write the data to the CSV file
-                    writer.writerow([shoulders_angle, head_right_shoulder_angle, cervical_spine_angle])            
-    
+                    writer.writerow([video_timestamp, shoulders_angle, head_right_shoulder_angle, 
+                                     cervical_spine_angle, head_pitch_yaw_angle, eye_ear_dist])            
+                        
                 # Display points
                 cv2.circle(image, (int(nose.x * w), int(nose.y * h)), 6, (0, 255, 0), -1)
                 cv2.circle(image, (int(left_shoulder.x * w), int(left_shoulder.y * h)), 6, (255, 0, 0), -1)
                 cv2.circle(image, (int(middle_x * w), int(middle_y * h)), 6, (255, 255, 0), -1)
+                cv2.circle(image, (int(left_eye_outer.x * w), int(left_eye_outer.y * h)), 6, (0, 255, 255), -1)
                 
                 # Calculate the middle point between nose and left shoulder
                 middle_point_x = (nose.x + left_shoulder.x) / 2
@@ -112,6 +143,13 @@ with mp_pose.Pose(min_detection_confidence=0.5, min_tracking_confidence=0.5) as 
                 cv2.putText(image, f'Cervical Spine Angle: {cervical_spine_angle:.2f}', (10, 110), cv2.FONT_HERSHEY_SIMPLEX, 1, (255, 255, 0), 2)
                 cv2.line(image, (int(middle_x * w), int(middle_y * h)), (int(middle_x * w), int(middle_y * h) - 230), (255, 255, 0), 2)
                 cv2.line(image, (int(middle_x * w), int(middle_y * h)), (int(right_shoulder.x * w), int(right_shoulder.y * h)), (255, 255, 0), 2)
+                
+                cv2.putText(image, f'Head pitch&yaw angle: {head_pitch_yaw_angle:.2f}', (10, 150), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 255, 255), 2)
+                cv2.line(image, (int(left_eye_outer.x * w), int(left_eye_outer.y * h)), (int(nose.x * w), int(nose.y * h)), (0, 255, 255), 2)
+                cv2.line(image, (int(left_eye_outer.x * w), int(left_eye_outer.y * h)), (int(left_ear.x * w), int(left_ear.y * h)), (0, 255, 255), 2)
+                
+                cv2.putText(image, f'Eye-ear Distance: {eye_ear_dist:.2f}', (10, 190), cv2.FONT_HERSHEY_SIMPLEX, 1, (128, 0, 128), 2)
+                cv2.line(image, (int(left_eye_outer.x * w), int(left_eye_outer.y * h)), (int(left_ear.x * w), int(left_ear.y * h)), (128, 0, 128), 2)
             
             elif view == 'side': 
                 
@@ -123,7 +161,7 @@ with mp_pose.Pose(min_detection_confidence=0.5, min_tracking_confidence=0.5) as 
                 with open(csv_file_path, mode='a', newline='') as file:
                     writer = csv.writer(file)
                     # Write the data to the CSV file
-                    writer.writerow([neck_inclination, torso_inclination])
+                    writer.writerow([video_timestamp, neck_inclination, torso_inclination])
                 
                 # Display points
                 cv2.circle(image, (int(left_shoulder.x * w), int(left_shoulder.y * h)), 6, (0, 255, 0), -1)
@@ -141,6 +179,7 @@ with mp_pose.Pose(min_detection_confidence=0.5, min_tracking_confidence=0.5) as 
             else:
                 print("You have just two options: 'front' or 'side'")
                 break
+            
         except AttributeError:
             pass
         
