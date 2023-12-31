@@ -1,12 +1,14 @@
 import os
 import pandas as pd
 import matplotlib.pyplot as plt
+import datetime
 
 view = 'side'
 
 # Load the CSV file into a pandas DataFrame
-csv_file_path = 'variables_2023-08-29_17-12-10.csv'
+csv_file_path = 'result_statistics/2022-11-18 10-43-49-2_mp.csv'
 data = pd.read_csv(csv_file_path)
+
 
 if view == 'front':
     # Extract data from columns
@@ -46,6 +48,8 @@ elif view == 'side':
     plt.figure(figsize=(10, 6))  # Adjust the figure size as needed
     plt.plot(neck_inclination, label='Neck Inclination', color='green')
     plt.plot(torso_inclination, label='Torso Inclination', color='cyan')
+    
+    plt.xticks(range(0, len(data), 5000))
     
     # Add labels and title
     plt.xlabel('Time')

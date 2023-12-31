@@ -6,8 +6,8 @@ import os
 import datetime
 
 view = 'front'
-file_name = 0
-#file_name = 'test_videos/horizontal/2022-11-14 09-26-55-2.mp4'
+#file_name = 0
+file_name = 'C:/Users/fucsi/2022-11-18 10-43-49-2_mp.csv'
 timestamp = datetime.datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
 
 
@@ -186,15 +186,15 @@ with mp_pose.Pose(min_detection_confidence=0.5, min_tracking_confidence=0.5) as 
 
         if file_name == 0:
             cv2.imshow('Mediapipe Pose', image)
-        else:
-            imS = cv2.resize(image, (640, 360))
-            cv2.imshow('Mediapipe Pose', imS)
-            out.write(image)
+        #else:
+            #imS = cv2.resize(image, (640, 360))
+            #cv2.imshow('Mediapipe Pose', imS)
+            #out.write(image)
 
-        if cv2.waitKey(5) & 0xFF == ord('q') or cv2.getWindowProperty('Mediapipe Pose', cv2.WND_PROP_VISIBLE) < 1:
-            break
+        #if cv2.waitKey(5) & 0xFF == ord('q') or cv2.getWindowProperty('Mediapipe Pose', cv2.WND_PROP_VISIBLE) < 1:
+            #break
 
 cap.release()
 if file_name != 0:
     out.release()
-cv2.destroyAllWindows()
+#cv2.destroyAllWindows()

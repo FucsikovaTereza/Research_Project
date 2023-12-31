@@ -14,8 +14,8 @@ mp_drawing = mp.solutions.drawing_utils
 drawing_spec = mp_drawing.DrawingSpec(thickness=1, circle_radius=1)
 
 # Input video file path
-video_path = 0
-#video_path = 'test_videos/horizontal/2022-11-14 09-26-55-1.mp4'
+#video_path = 0
+video_path = 'C:/Users/fucsi/Desktop/JADERKA/Ing/2rocnik/Research_Project/videos/2022-11-18 10-43-49-1.mkv'
 
 # Open the video file
 cap = cv2.VideoCapture(video_path)
@@ -171,16 +171,16 @@ with open(output_stats_path, mode='w', newline='') as csvfile:
         totalTime = end - start
 
         fps = 1 / totalTime
-        #cv2.putText(image, f'FPS: {int(fps)}', (20, 450), cv2.FONT_HERSHEY_SIMPLEX, 1.5, (0, 255, 0), 2)
+        cv2.putText(image, f'FPS: {int(fps)}', (20, 450), cv2.FONT_HERSHEY_SIMPLEX, 1.5, (0, 255, 0), 2)
 
         # Write frame to output video
         if out_video is not None:
             out_video.write(image)
 
-        cv2.imshow('Head Pose Estimation', image)
+        #cv2.imshow('Head Pose Estimation', image)
 
-        if cv2.waitKey(1) & 0xFF == ord('q') or cv2.getWindowProperty('Head Pose Estimation', cv2.WND_PROP_VISIBLE) < 1:
-            break
+        #if cv2.waitKey(1) & 0xFF == ord('q') or cv2.getWindowProperty('Head Pose Estimation', cv2.WND_PROP_VISIBLE) < 1:
+        #    break
 
 # Release video capture and writer
 cap.release()
