@@ -101,7 +101,7 @@ class MediaPipe_PoseEstimation:
         frame_number = 0
         with mp_pose.Pose(min_detection_confidence=0.5, min_tracking_confidence=0.5) as pose:
             while cap.isOpened():
-                success, frame = cap.read()
+                success, image = cap.read()
                 if not success:
                   print("Null.Frames")
                   break
@@ -109,15 +109,15 @@ class MediaPipe_PoseEstimation:
                     fps = cap.get(cv2.CAP_PROP_FPS)
                     video_timestamp = round(frame_number / fps)
                     video_timestamp = str(datetime.timedelta(seconds=video_timestamp))
-                    h, w = frame.shape[:2]
+                    h, w = image.shape[:2]
 
-                    frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
-                    frame.flags.writeable = False
+                    image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
+                    image.flags.writeable = False
 
-                    keypoints = pose.process(frame)
+                    keypoints = pose.process(image)
 
-                    frame.flags.writeable = True
-                    frame = cv2.cvtColor(frame, cv2.COLOR_RGB2BGR)
+                    image.flags.writeable = True
+                    image = cv2.cvtColor(image, cv2.COLOR_RGB2BGR)
 
                     landmarks = keypoints.pose_landmarks.landmark
                     world_landmarks = keypoints.pose_world_landmarks.landmark
@@ -220,49 +220,49 @@ class MediaPipe_PoseEstimation:
 
                     # Display points
                     if self.view == 'front':       
-                        cv2.circle(frame, (nose.x, nose.y), 6, (0, 255, 0), -1)
-                        cv2.circle(frame, (left_shoulder.x, left_shoulder.y), 6, (255, 0, 0), -1)
-                        cv2.circle(frame, (middle_x, middle_y), 6, (255, 255, 0), -1)
-                        cv2.circle(frame, (left_eye_outer.x, left_eye_outer.y), 6, (0, 255, 255), -1)
+                        cv2.circle(image, (nose.x, nose.y), 6, (0, 255, 0), -1)
+                        cv2.circle(image, (left_shoulder.x, left_shoulder.y), 6, (255, 0, 0), -1)
+                        cv2.circle(image, (middle_x, middle_y), 6, (255, 255, 0), -1)
+                        cv2.circle(image, (left_eye_outer.x, left_eye_outer.y), 6, (0, 255, 255), -1)
                             
                         # Display angle and lines on the image
-                        cv2.putText(frame, f'Shoulders Angle: {shoulders_angle:.2f}', (10, 30), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 255, 0), 2)
-                        cv2.line(frame, (nose.x, nose.y), (middle_point_x, middle_point_y), (0, 255, 0), 2)
-                        cv2.line(frame, (right_shoulder.x, right_shoulder.y), (nose.x, nose.y), (0, 255, 0), 2)
+                        cv2.putText(image, f'Shoulders Angle: {shoulders_angle:.2f}', (10, 30), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 255, 0), 2)
+                        cv2.line(image, (nose.x, nose.y), (middle_point_x, middle_point_y), (0, 255, 0), 2)
+                        cv2.line(image, (right_shoulder.x, right_shoulder.y), (nose.x, nose.y), (0, 255, 0), 2)
                             
-                        cv2.putText(frame, f'Head-shoulder Angle: {head_right_shoulder_angle:.2f}', (10, 70), cv2.FONT_HERSHEY_SIMPLEX, 1, (255, 0, 0), 2)
-                        cv2.line(frame, (left_shoulder.x, left_shoulder.y), (right_shoulder.x, right_shoulder.y), (255, 0, 0), 2)
-                        cv2.line(frame, (left_shoulder.x, left_shoulder.y), (middle_point_x, middle_point_y), (255, 0, 0), 2)
+                        cv2.putText(image, f'Head-shoulder Angle: {head_right_shoulder_angle:.2f}', (10, 70), cv2.FONT_HERSHEY_SIMPLEX, 1, (255, 0, 0), 2)
+                        cv2.line(image, (left_shoulder.x, left_shoulder.y), (right_shoulder.x, right_shoulder.y), (255, 0, 0), 2)
+                        cv2.line(image, (left_shoulder.x, left_shoulder.y), (middle_point_x, middle_point_y), (255, 0, 0), 2)
                         
-                        cv2.putText(frame, f'Cervical Spine Angle: {cervical_spine_angle:.2f}', (10, 110), cv2.FONT_HERSHEY_SIMPLEX, 1, (255, 255, 0), 2)
-                        cv2.line(frame, (middle_x, middle_y), (middle_x, middle_y - 230), (255, 255, 0), 2)
-                        cv2.line(frame, (middle_x, middle_y), (right_shoulder.x, right_shoulder.y), (255, 255, 0), 2)
+                        cv2.putText(image, f'Cervical Spine Angle: {cervical_spine_angle:.2f}', (10, 110), cv2.FONT_HERSHEY_SIMPLEX, 1, (255, 255, 0), 2)
+                        cv2.line(image, (middle_x, middle_y), (middle_x, middle_y - 230), (255, 255, 0), 2)
+                        cv2.line(image, (middle_x, middle_y), (right_shoulder.x, right_shoulder.y), (255, 255, 0), 2)
                         
-                        cv2.putText(frame, f'Head pitch&yaw angle: {head_pitch_yaw_angle:.2f}', (10, 150), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 255, 255), 2)
-                        cv2.line(frame, (left_eye_outer.x, left_eye_outer.y), (nose.x, nose.y), (0, 255, 255), 2)
-                        cv2.line(frame, (left_eye_outer.x, left_eye_outer.y), (left_ear.x, left_ear.y), (0, 255, 255), 2)
+                        cv2.putText(image, f'Head pitch&yaw angle: {head_pitch_yaw_angle:.2f}', (10, 150), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 255, 255), 2)
+                        cv2.line(image, (left_eye_outer.x, left_eye_outer.y), (nose.x, nose.y), (0, 255, 255), 2)
+                        cv2.line(image, (left_eye_outer.x, left_eye_outer.y), (left_ear.x, left_ear.y), (0, 255, 255), 2)
                         
-                        cv2.putText(frame, f'Eye-ear Distance: {eye_ear_dist:.2f}', (10, 190), cv2.FONT_HERSHEY_SIMPLEX, 1, (128, 0, 128), 2)
-                        cv2.line(frame, (left_eye_outer.x, left_eye_outer.y), (left_ear.x, left_ear.y), (128, 0, 128), 2)
+                        cv2.putText(image, f'Eye-ear Distance: {eye_ear_dist:.2f}', (10, 190), cv2.FONT_HERSHEY_SIMPLEX, 1, (128, 0, 128), 2)
+                        cv2.line(image, (left_eye_outer.x, left_eye_outer.y), (left_ear.x, left_ear.y), (128, 0, 128), 2)
                         
-                        cv2.putText(frame, f'Shoulders inclination: {shoulders_inclination:.2f}', (10, 230), cv2.FONT_HERSHEY_SIMPLEX, 0.7, (0, 150, 255), 2)
-                        cv2.line(frame, (int(right_shoulder.x * w), int(right_shoulder.y * h)), (int(right_shoulder.x * w) + 100, int(right_shoulder.y * h)), (0, 150, 255), 2)
+                        cv2.putText(image, f'Shoulders inclination: {shoulders_inclination:.2f}', (10, 230), cv2.FONT_HERSHEY_SIMPLEX, 0.7, (0, 150, 255), 2)
+                        cv2.line(image, (int(right_shoulder.x * w), int(right_shoulder.y * h)), (int(right_shoulder.x * w) + 100, int(right_shoulder.y * h)), (0, 150, 255), 2)
                             
                     elif self.view == 'side':
-                        cv2.circle(frame, (shoulder.x, shoulder.y), 6, (0, 255, 0), -1)
-                        cv2.circle(frame, (hip.x, hip.y), 6, (255, 255, 0), -1)
+                        cv2.circle(image, (shoulder.x, shoulder.y), 6, (0, 255, 0), -1)
+                        cv2.circle(image, (hip.x, hip.y), 6, (255, 255, 0), -1)
                         
                         # Display angle and lines on the image
-                        cv2.putText(frame, f'Neck inclination: {neck_inclination:.2f}', (10, 30), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 255, 0), 2)
-                        cv2.line(frame, (shoulder.x, shoulder.y), (shoulder.x, shoulder.y - 100), (0, 255, 0), 2)
-                        cv2.line(frame, (shoulder.x, shoulder.y), (ear.x, ear.y), (0, 255, 0), 2)
+                        cv2.putText(image, f'Neck inclination: {neck_inclination:.2f}', (10, 30), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 255, 0), 2)
+                        cv2.line(image, (shoulder.x, shoulder.y), (shoulder.x, shoulder.y - 100), (0, 255, 0), 2)
+                        cv2.line(image, (shoulder.x, shoulder.y), (ear.x, ear.y), (0, 255, 0), 2)
                         
-                        cv2.putText(frame, f'Torso inclination: {torso_inclination:.2f}', (10, 70), cv2.FONT_HERSHEY_SIMPLEX, 1, (255, 255, 0), 2)
-                        cv2.line(frame, (hip.x, hip.y), (hip.x, hip.y - 100), (255, 255, 0), 2)
-                        cv2.line(frame, (hip.x, hip.y), (shoulder.x, shoulder.y), (255, 255, 0), 2)
+                        cv2.putText(image, f'Torso inclination: {torso_inclination:.2f}', (10, 70), cv2.FONT_HERSHEY_SIMPLEX, 1, (255, 255, 0), 2)
+                        cv2.line(image, (hip.x, hip.y), (hip.x, hip.y - 100), (255, 255, 0), 2)
+                        cv2.line(image, (hip.x, hip.y), (shoulder.x, shoulder.y), (255, 255, 0), 2)
 
                     # Write the frame into the file
-                    out.write(frame)
+                    out.write(image)
 
                     #if cv2.waitKey(5) & 0xFF == 27:  # Press 'Esc' to exit the video window
                     #    break
