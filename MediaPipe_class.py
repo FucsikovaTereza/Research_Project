@@ -60,18 +60,22 @@ class MediaPipe_PoseEstimation:
             writer = csv.writer(file)
             if self.view == 'front':
                 writer.writerow(["video_timestamp", "shoulders_angle", "shoulders_inclination", "head_right_shoulder_angle", 
-                                 "cervical_spine_angle", "head_pitch_yaw_angle", "eye_ear_dist",
+                                 "cervical_spine_angle", "head_pitch_yaw_angle", "eye_ear_dist", "head_pitch_yaw_angle2", "eye_ear_dist2",
                                  "nose X", "nose Y", "nose Z",
                                  "right_shoulder X", "right_shoulder Y", "right_shoulder Z",
                                  "left_shoulder X", "left_shoulder Y", "left_shoulder Z",
                                  "middle_x", "middle_y",
+                                 "right_eye_outer X", "right_eye_outer Y", "right_eye_outer Z",
                                  "left_eye_outer X", "left_eye_outer Y", "left_eye_outer Z",
-                                 "middle_point_x", "middle_point_y",
+                                 "right_ear X", "right_ear Y", "right_ear Z",
                                  "left_ear X", "left_ear Y", "left_ear Z",
                                  "nose_world X", "nose_world Y", "nose_world Z",
                                  "right_shoulder_world X", "right_shoulder_world Y", "right_shoulder_world Z",
                                  "left_shoulder_world X", "left_shoulder_world Y", "left_shoulder_world Z",
+                                 "middle_x_world", "middle_y_world",
+                                 "right_eye_outer X_world", "right_eye_outer Y_world", "right_eye_outer Z_world",
                                  "left_eye_outer_world X", "left_eye_outer_world Y", "left_eye_outer_world Z",
+                                 "right_ear_world X", "right_ear_world Y", "right_ear_world Z",
                                  "left_ear_world X", "left_ear_world Y", "left_ear_world Z"
                                  ])
             elif self.view == 'side':
@@ -131,6 +135,7 @@ class MediaPipe_PoseEstimation:
                     left_hip = landmarks[mp_pose.PoseLandmark.LEFT_HIP]
                     right_hip = landmarks[mp_pose.PoseLandmark.RIGHT_HIP]
                     left_eye_outer = landmarks[mp_pose.PoseLandmark.LEFT_EYE_OUTER]
+                    right_eye_outer = landmarks[mp_pose.PoseLandmark.RIGHT_EYE_OUTER]
                     
                     # Extract WorldLandmarks
                     left_shoulder_world = world_landmarks[mp_pose.PoseLandmark.LEFT_SHOULDER]
@@ -141,6 +146,8 @@ class MediaPipe_PoseEstimation:
                     left_hip_world = world_landmarks[mp_pose.PoseLandmark.LEFT_HIP]
                     right_hip_world = world_landmarks[mp_pose.PoseLandmark.RIGHT_HIP]
                     left_eye_outer_world = world_landmarks[mp_pose.PoseLandmark.LEFT_EYE_OUTER]
+                    right_eye_outer_world = world_landmarks[mp_pose.PoseLandmark.RIGHT_EYE_OUTER]
+                    
                     
                     if self.view == 'front':
                         
@@ -148,6 +155,7 @@ class MediaPipe_PoseEstimation:
                         shoulders_angle = self.calculate_angle(left_shoulder, nose, right_shoulder)
                         head_right_shoulder_angle = self.calculate_angle(nose, left_shoulder, right_shoulder)
                         head_pitch_yaw_angle = self.calculate_angle(nose, left_eye_outer, left_ear)
+                        head_pitch_yaw_angle2 = self.calculate_angle(nose, right_eye_outer, right_ear)
 
                         shoulders_inclination = self.calculate_angle2(int(right_shoulder.x * w), int(right_shoulder.y * h),
                                                                       int(left_shoulder.x * w), int(left_shoulder.y * h),
@@ -155,32 +163,42 @@ class MediaPipe_PoseEstimation:
                         
                         middle_x = (right_shoulder.x + left_shoulder.x) / 2
                         middle_y = (right_shoulder.y + left_shoulder.y) / 2
+                        middle_x_world = (right_shoulder_world.x + left_shoulder_world.x) / 2
+                        middle_y_world = (right_shoulder_world.y + left_shoulder_world.y) / 2
                         cervical_spine_angle = self.calculate_angle2(int(middle_x * w), int(middle_y * h), int(left_shoulder.x * w), int(left_shoulder.y * h))
                         
                         eye_ear_dist = self.calculate_distance(left_ear, left_eye_outer)
+                        eye_ear_dist2 = self.calculate_distance(right_ear, right_eye_outer)
                         
                         # Calculate the middle point between nose and left shoulder
                         middle_point_x = (nose.x + left_shoulder.x) / 2
                         middle_point_y = (nose.y + left_shoulder.y) / 2
-            
+                        # Calculate the middle point between nose and left shoulder
+                        middle_point2_x = (right_shoulder.x + middle_x) / 2
+                        middle_point2_y = (right_shoulder.y + middle_y) / 2
+
                         # Open the CSV file in write mode
                         with open(self.csv_file_name, mode='a', newline='') as file:
                             writer = csv.writer(file)
                             # Write the data to the CSV file
                             writer.writerow([video_timestamp, shoulders_angle, shoulders_inclination, head_right_shoulder_angle, 
-                                             cervical_spine_angle, head_pitch_yaw_angle, eye_ear_dist,
-                                             int(nose.x * w), int(nose.y * h), int(nose.z * h),
-                                             int(right_shoulder.x * w), int(right_shoulder.y * h), int(right_shoulder.z * h),
-                                             int(left_shoulder.x * w), int(left_shoulder.y * h), int(left_shoulder.z * h),
+                                             cervical_spine_angle, head_pitch_yaw_angle, eye_ear_dist, head_pitch_yaw_angle2, eye_ear_dist2,
+                                             int(nose.x * w), int(nose.y * h), int(nose.z * w),
+                                             int(right_shoulder.x * w), int(right_shoulder.y * h), int(right_shoulder.z * w),
+                                             int(left_shoulder.x * w), int(left_shoulder.y * h), int(left_shoulder.z * w),
                                              int(middle_x * w), int(middle_y * h),
-                                             int(left_eye_outer.x * w), int(left_eye_outer.y * h), int(left_eye_outer.z * h),
-                                             int(middle_point_x * w), int(middle_point_y * h), 
-                                             int(left_ear.x * w), int(left_ear.y * h), int(left_ear.z * h),
-                                             int(nose_world.x * w), int(nose_world.y * h), int(nose_world.z * h),
-                                             int(right_shoulder_world.x * w), int(right_shoulder_world.y * h), int(right_shoulder_world.z * h),
-                                             int(left_shoulder_world.x * w), int(left_shoulder_world.y * h), int(left_shoulder_world.z * h),
-                                             int(left_eye_outer_world.x * w), int(left_eye_outer_world.y * h), int(left_eye_outer_world.z * h),
-                                             int(left_ear_world.x * w), int(left_ear_world.y * h), int(left_ear_world.z * h)
+                                             int(right_eye_outer.x * w), int(right_eye_outer.y * h), int(right_eye_outer.z * w),
+                                             int(left_eye_outer.x * w), int(left_eye_outer.y * h), int(left_eye_outer.z * w),
+                                             int(right_ear.x * w), int(right_ear.y * h), int(right_ear.z * w),
+                                             int(left_ear.x * w), int(left_ear.y * h), int(left_ear.z * w),
+                                             int(nose_world.x), int(nose_world.y), int(nose_world.z),
+                                             int(right_shoulder_world.x), int(right_shoulder_world.y), int(right_shoulder_world.z),
+                                             int(left_shoulder_world.x), int(left_shoulder_world.y), int(left_shoulder_world.z),
+                                             int(middle_x_world), int(middle_y_world),
+                                             int(right_eye_outer_world.x), int(right_eye_outer_world.y), int(right_eye_outer_world.z),
+                                             int(left_eye_outer_world.x), int(left_eye_outer_world.y), int(left_eye_outer_world.z),
+                                             int(right_ear_world.x), int(right_ear_world.y), int(right_ear_world.z),
+                                             int(left_ear_world.x), int(left_ear_world.y), int(left_ear_world.z)
                                              ])                                   
                     
                     elif self.view == 'side': 
@@ -210,56 +228,58 @@ class MediaPipe_PoseEstimation:
                             writer = csv.writer(file)
                             # Write the data to the CSV file
                             writer.writerow([video_timestamp, neck_inclination, torso_inclination,
-                                            int(shoulder.x * w), int(shoulder.y * h), int(shoulder.z * h),
-                                            int(hip.x * w), int(hip.y * h), int(hip.z * h),
-                                            int(ear.x * w), int(ear.y * h), int(ear.z * h),
-                                            int(shoulder_world.x * w), int(shoulder_world.y * h), int(shoulder_world.z * h),
-                                            int(hip_world.x * w), int(hip_world.y * h), int(hip_world.z * h),
-                                            int(ear_world.x * w), int(ear_world.y * h), int(ear_world.z * h)
+                                            int(shoulder.x * w), int(shoulder.y * h), int(shoulder.z * w),
+                                            int(hip.x * w), int(hip.y * h), int(hip.z * w),
+                                            int(ear.x * w), int(ear.y * h), int(ear.z * w),
+                                            int(shoulder_world.x), int(shoulder_world.y), int(shoulder_world.z),
+                                            int(hip_world.x), int(hip_world.y), int(hip_world.z),
+                                            int(ear_world.x), int(ear_world.y), int(ear_world.z)
                                             ])                       
 
                     # Display points
                     if self.view == 'front':       
-                        cv2.circle(image, (nose.x, nose.y), 6, (0, 255, 0), -1)
-                        cv2.circle(image, (left_shoulder.x, left_shoulder.y), 6, (255, 0, 0), -1)
-                        cv2.circle(image, (middle_x, middle_y), 6, (255, 255, 0), -1)
-                        cv2.circle(image, (left_eye_outer.x, left_eye_outer.y), 6, (0, 255, 255), -1)
+                        cv2.circle(image, (int(nose.x * w), int(nose.y * h)), 6, (0, 255, 0), -1)
+                        cv2.circle(image, (int(left_shoulder.x * w), int(left_shoulder.y * h)), 6, (255, 0, 0), -1)
+                        cv2.circle(image, (int(middle_x * w), int(middle_y * h)), 6, (255, 255, 0), -1)
+                        cv2.circle(image, (int(left_eye_outer.x * w), int(left_eye_outer.y * h)), 6, (0, 255, 255), -1)
+                        cv2.circle(image, (int(right_shoulder.x * w), int(right_shoulder.y * h)), 6, (0, 150, 255), -1)
                             
                         # Display angle and lines on the image
                         cv2.putText(image, f'Shoulders Angle: {shoulders_angle:.2f}', (10, 30), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 255, 0), 2)
-                        cv2.line(image, (nose.x, nose.y), (middle_point_x, middle_point_y), (0, 255, 0), 2)
-                        cv2.line(image, (right_shoulder.x, right_shoulder.y), (nose.x, nose.y), (0, 255, 0), 2)
-                            
+                        cv2.line(image, (int(nose.x * w), int(nose.y * h)), (int(middle_point_x * w), int(middle_point_y * h)), (0, 255, 0), 2)
+                        cv2.line(image, (int(right_shoulder.x * w), int(right_shoulder.y * h)), (int(nose.x * w), int(nose.y * h)), (0, 255, 0), 2)
+                        
                         cv2.putText(image, f'Head-shoulder Angle: {head_right_shoulder_angle:.2f}', (10, 70), cv2.FONT_HERSHEY_SIMPLEX, 1, (255, 0, 0), 2)
-                        cv2.line(image, (left_shoulder.x, left_shoulder.y), (right_shoulder.x, right_shoulder.y), (255, 0, 0), 2)
-                        cv2.line(image, (left_shoulder.x, left_shoulder.y), (middle_point_x, middle_point_y), (255, 0, 0), 2)
+                        cv2.line(image, (int(left_shoulder.x * w), int(left_shoulder.y * h)), (int(right_shoulder.x * w), int(right_shoulder.y * h)), (255, 0, 0), 2)
+                        cv2.line(image, (int(left_shoulder.x * w), int(left_shoulder.y * h)), (int(middle_point_x * w), int(middle_point_y * h)), (255, 0, 0), 2)
                         
                         cv2.putText(image, f'Cervical Spine Angle: {cervical_spine_angle:.2f}', (10, 110), cv2.FONT_HERSHEY_SIMPLEX, 1, (255, 255, 0), 2)
-                        cv2.line(image, (middle_x, middle_y), (middle_x, middle_y - 230), (255, 255, 0), 2)
-                        cv2.line(image, (middle_x, middle_y), (right_shoulder.x, right_shoulder.y), (255, 255, 0), 2)
+                        cv2.line(image, (int(middle_x * w), int(middle_y * h)), (int(middle_x * w), int(middle_y * h) - 230), (255, 255, 0), 2)
+                        cv2.line(image, (int(middle_x * w), int(middle_y * h)), (int(middle_point2_x * w), int(middle_point2_y * h)), (255, 255, 0), 2)
                         
                         cv2.putText(image, f'Head pitch&yaw angle: {head_pitch_yaw_angle:.2f}', (10, 150), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 255, 255), 2)
-                        cv2.line(image, (left_eye_outer.x, left_eye_outer.y), (nose.x, nose.y), (0, 255, 255), 2)
-                        cv2.line(image, (left_eye_outer.x, left_eye_outer.y), (left_ear.x, left_ear.y), (0, 255, 255), 2)
+                        cv2.line(image, (int(left_eye_outer.x * w), int(left_eye_outer.y * h)), (int(nose.x * w), int(nose.y * h)), (0, 255, 255), 2)
+                        cv2.line(image, (int(left_eye_outer.x * w), int(left_eye_outer.y * h)), (int(left_ear.x * w), int(left_ear.y * h)), (0, 255, 255), 2)
                         
                         cv2.putText(image, f'Eye-ear Distance: {eye_ear_dist:.2f}', (10, 190), cv2.FONT_HERSHEY_SIMPLEX, 1, (128, 0, 128), 2)
-                        cv2.line(image, (left_eye_outer.x, left_eye_outer.y), (left_ear.x, left_ear.y), (128, 0, 128), 2)
+                        cv2.line(image, (int(left_eye_outer.x * w), int(left_eye_outer.y * h)), (int(left_ear.x * w), int(left_ear.y * h)), (128, 0, 128), 2)
                         
-                        cv2.putText(image, f'Shoulders inclination: {shoulders_inclination:.2f}', (10, 230), cv2.FONT_HERSHEY_SIMPLEX, 0.7, (0, 150, 255), 2)
-                        cv2.line(image, (int(right_shoulder.x * w), int(right_shoulder.y * h)), (int(right_shoulder.x * w) + 100, int(right_shoulder.y * h)), (0, 150, 255), 2)
+                        cv2.putText(image, f'Shoulders inclination: {shoulders_inclination:.2f}', (10, 230), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 150, 255), 2)
+                        cv2.line(image, (int(right_shoulder.x * w), int(right_shoulder.y * h)), (int(right_shoulder.x * w) + 230, int(right_shoulder.y * h)), (0, 150, 255), 2)
+                        cv2.line(image, (int(middle_point2_x * w), int(middle_point2_y * h)), (int(right_shoulder.x * w), int(right_shoulder.y * h)), (0, 150, 255), 2)
                             
-                    elif self.view == 'side':
-                        cv2.circle(image, (shoulder.x, shoulder.y), 6, (0, 255, 0), -1)
-                        cv2.circle(image, (hip.x, hip.y), 6, (255, 255, 0), -1)
+                    elif self.view == 'side':   
+                        cv2.circle(image, (int(shoulder.x * w), int(shoulder.y * h)), 6, (0, 255, 0), -1)
+                        cv2.circle(image, (int(hip.x * w), int(hip.y * h)), 6, (255, 255, 0), -1)
                         
                         # Display angle and lines on the image
                         cv2.putText(image, f'Neck inclination: {neck_inclination:.2f}', (10, 30), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 255, 0), 2)
-                        cv2.line(image, (shoulder.x, shoulder.y), (shoulder.x, shoulder.y - 100), (0, 255, 0), 2)
-                        cv2.line(image, (shoulder.x, shoulder.y), (ear.x, ear.y), (0, 255, 0), 2)
+                        cv2.line(image, (int(shoulder.x * w), int(shoulder.y * h)), (int(shoulder.x * w), int(shoulder.y * h) - 230), (0, 255, 0), 2)
+                        cv2.line(image, (int(shoulder.x * w), int(shoulder.y * h)), (int(ear.x * w), int(ear.y * h)), (0, 255, 0), 2)
                         
                         cv2.putText(image, f'Torso inclination: {torso_inclination:.2f}', (10, 70), cv2.FONT_HERSHEY_SIMPLEX, 1, (255, 255, 0), 2)
-                        cv2.line(image, (hip.x, hip.y), (hip.x, hip.y - 100), (255, 255, 0), 2)
-                        cv2.line(image, (hip.x, hip.y), (shoulder.x, shoulder.y), (255, 255, 0), 2)
+                        cv2.line(image, (int(hip.x * w), int(hip.y * h)), (int(hip.x * w), int(hip.y * h) - 230), (255, 255, 0), 2)
+                        cv2.line(image, (int(hip.x * w), int(hip.y * h)), (int(shoulder.x * w), int(shoulder.y * h)), (255, 255, 0), 2)
 
                     # Write the frame into the file
                     out.write(image)
@@ -277,4 +297,4 @@ class MediaPipe_PoseEstimation:
         out.release()
 
         # Destroy all OpenCV windows
-        #cv2.destroyAllWindows()
+        #cv2.destroyAllWindows()      
