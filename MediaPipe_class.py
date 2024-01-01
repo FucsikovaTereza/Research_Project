@@ -262,7 +262,7 @@ class MediaPipe_PoseEstimation:
                         cv2.line(frame, (hip.x, hip.y), (shoulder.x, shoulder.y), (255, 255, 0), 2)
 
                     # Write the frame into the file
-                    out.write(image)
+                    out.write(frame)
 
                     #if cv2.waitKey(5) & 0xFF == 27:  # Press 'Esc' to exit the video window
                     #    break
