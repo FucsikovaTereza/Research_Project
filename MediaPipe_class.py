@@ -111,13 +111,13 @@ class MediaPipe_PoseEstimation:
                     video_timestamp = str(datetime.timedelta(seconds=video_timestamp))
                     h, w = frame.shape[:2]
 
-                    image = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
-                    image.flags.writeable = False
+                    frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
+                    frame.flags.writeable = False
 
                     keypoints = pose.process(frame)
 
-                    image.flags.writeable = True
-                    image = cv2.cvtColor(image, cv2.COLOR_RGB2BGR)
+                    frame.flags.writeable = True
+                    frame = cv2.cvtColor(frame, cv2.COLOR_RGB2BGR)
 
                     landmarks = keypoints.pose_landmarks.landmark
                     world_landmarks = keypoints.pose_world_landmarks.landmark
@@ -245,8 +245,8 @@ class MediaPipe_PoseEstimation:
                         cv2.putText(frame, f'Eye-ear Distance: {eye_ear_dist:.2f}', (10, 190), cv2.FONT_HERSHEY_SIMPLEX, 1, (128, 0, 128), 2)
                         cv2.line(frame, (left_eye_outer.x, left_eye_outer.y), (left_ear.x, left_ear.y), (128, 0, 128), 2)
                         
-                        cv2.putText(image, f'Shoulders inclination: {shoulders_inclination:.2f}', (10, 230), cv2.FONT_HERSHEY_SIMPLEX, 0.7, (0, 150, 255), 2)
-                        cv2.line(image, (int(right_shoulder.x * w), int(right_shoulder.y * h)), (int(right_shoulder.x * w) + 100, int(right_shoulder.y * h)), (0, 150, 255), 2)
+                        cv2.putText(frame, f'Shoulders inclination: {shoulders_inclination:.2f}', (10, 230), cv2.FONT_HERSHEY_SIMPLEX, 0.7, (0, 150, 255), 2)
+                        cv2.line(frame, (int(right_shoulder.x * w), int(right_shoulder.y * h)), (int(right_shoulder.x * w) + 100, int(right_shoulder.y * h)), (0, 150, 255), 2)
                             
                     elif self.view == 'side':
                         cv2.circle(frame, (shoulder.x, shoulder.y), 6, (0, 255, 0), -1)
