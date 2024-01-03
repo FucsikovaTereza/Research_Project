@@ -126,7 +126,7 @@ class MediaPipe_PoseEstimation:
                     if frame_number == 1:
                         mp_drawing = mp.solutions.drawing_utils 
                         mp_drawing.plot_landmarks(results.pose_world_landmarks, mp_pose.POSE_CONNECTIONS)
-                        cv2.imwrite('statistics/Honza2/frame-2.jpg', image)
+                        #cv2.imwrite('statistics/Honza2/frame-2.jpg', image)
 
                     # Extract Landmarks
                     left_shoulder = landmarks[mp_pose.PoseLandmark.LEFT_SHOULDER]
